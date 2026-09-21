@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Our Little Dates ♡</title>
+  <style>
+    :root {
+      --bg: #fff8f7;
+      --card: #fff;
+      --ink: #4b3940;
+      --muted: #967d86;
+      --pink: #e89aaa;
+      --lav: #b7a5d9;
+      --mint: #a8d8c8;
+      --shadow: 0 16px 45px rgba(125, 89, 109, 0.1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at 10% 10%, #ffe4ea, transparent 32%), radial-gradient(circle at 90% 15%, #e8e0ff, transparent 28%), var(--bg);
+      min-height: 100vh;
+    }
+    button, input, textarea { font: inherit; }
+    button { border: 0; cursor: pointer; }
+    h1, h2 { font-family: "Brush Script MT", "Segoe Script", cursive; font-weight: 500; }
+    
+    /* Pantalla de Bloqueo */
+    #lock {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .lock-card {
+      max-width: 430px;
+      width: 100%;
+      padding: 42px 30px;
+      text-align: center;
+      background: #ffffffdd;
+      backdrop-filter: blur(16px);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+    }
+    .heart { font-size: 48px; }
+    h1 { font-size: 48px; margin: 8px 0; }
+    .subtitle { color: var(--muted); }
+    input, textarea {
+      width: 100%;
+      border: 1px solid #ead9df;
+      background: #fff;
+      border-radius: 16px;
+      padding: 14px 16px;
+      outline: none;
+    }
+    .row { display: flex; gap: 10px; margin-top: 14px; }
+    .primary {
+      background: linear-gradient(135deg, var(--pink), #c997d9);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: 16px;
+      font-weight: 700;
+      box-shadow: 0 8px 20px rgba(193, 122, 146, 0.15);
+    }
+    .ghost { background: #fff7fa; color: #765766; padding: 12px 16px; border-radius: 14px; }
+    .bigbtn { font-size: 17px; margin-top: 14px; }
+    .error { color: #b74f67; font-size: 13px; margin-top: 10px; min-height: 18px; }
+
+    /* Aplicación Principal */
+    #app { display: none; }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #fff8f7dd;
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid #fff;
+    }
+    nav {
+      max-width: 1100px;
+      margin: auto;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand { font-family: cursive; font-size: 25px; }
+    .navlinks { display: flex; gap: 7px; flex-wrap: wrap; }
+    .navlinks button { background: transparent; padding: 9px 11px; border-radius: 12px; color: var(--muted); }
+    .navlinks button.active, .navlinks button:hover { background: #fff; box-shadow: 0 5px 15px rgba(143, 101, 112, 0.1); color: var(--ink); }
+
+    main { max-width: 1100px; margin: auto; padding: 30px 18px 70px; }
+    .hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 22px; }
+    .panel { background: #ffffffdd; border-radius: 28px; box-shadow: var(--shadow); padding: 28px; }
+    .hero h2, .section-title { font-size: 48px; margin: 8px 0 18px; }
+    .eyebrow { letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-size: 12px; font-weight: 800; }
+    .progress { height: 10px; background: #f1e6e9; border-radius: 99px; overflow: hidden; }
+    .progress > div { height: 100%; background: linear-gradient(90deg, var(--pink), var(--lav)); width: 0%; transition: 0.5s; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+    .stat { background: #fff7f8; border-radius: 18px; padding: 15px; text-align: center; }
+    .stat b { font-size: 24px; display: block; }
+    .date-card {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 380px;
+      background: linear-gradient(145deg, #fff, #fff2f5);
+      position: relative;
+      overflow: hidden;
+    }
+    .date-card:before { content: "♡"; position: absolute; font-size: 160px; color: rgba(232, 154, 170, 0.1); right: -20px; bottom: -65px; }
+    .date-letter { font-size: 13px; color: var(--muted); letter-spacing: 0.1em; }
+    .date-text { font-family: cursive; font-size: 34px; line-height: 1.2; margin: 12px 0 20px; position: relative; }
+    .actions { display: flex; gap: 9px; flex-wrap: wrap; }
+
+    .view { display: none; }
+    .view.active { display: block; }
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+    .letters { display: flex; gap: 7px; flex-wrap: wrap; }
+    .letters button { width: 34px; height: 34px; border-radius: 50%; background: #fff; color: var(--muted); }
+    .letters button.active { background: var(--pink); color: #fff; }
+    .list { display: grid; gap: 10px; }
+    .item { background: #fff; border-radius: 18px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 6px 18px rgba(125, 89, 109, 0.05); }
+    .check { width: 24px; height: 24px; border-radius: 50%; border: 1px solid #e4cbd3; background: #fff; flex: none; }
+    .item.done .check { background: var(--mint); border-color: var(--mint); position: relative; }
+    .item.done .check:after { content: "✓"; color: #fff; position: absolute; left: 5px; top: 1px; }
+    .item.done .txt { text-decoration: line-through; color: #aa999f; }
+    .meta { font-size: 12px; color: var(--muted); margin-top: 5px; }
+    .small-actions { margin-left: auto; }
+    .small-actions button { background: #fff6f8; padding: 7px; border-radius: 9px; }
+    .memories { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+    .memory { background: #fff; border-radius: 22px; overflow: hidden; box-shadow: var(--shadow); }
+    .memory img { width: 100%; height: 170px; object-fit: cover; }
+    .memory-body { padding: 15px; }
+    
+    .modal { position: fixed; inset: 0; background: rgba(75, 57, 64, 0.4); display: none; place-items: center; padding: 20px; z-index: 50; }
+    .modal.show { display: grid; }
+    .modal-card { background: #fff; border-radius: 25px; max-width: 560px; width: 100%; padding: 24px; max-height: 90vh; overflow: auto; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; }
+    .formgrid { display: grid; gap: 10px; margin-top: 14px; }
+    footer { text-align: center; color: var(--muted); padding: 20px; }
+
+    @media (max-width: 760px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero h2, .section-title { font-size: 42px; }
+      .date-text { font-size: 30px; }
+      nav { align-items: flex-start; flex-direction: column; }
+      .navlinks { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Bloqueo -->
+  <div id="lock">
+    <div class="lock-card">
+      <div class="heart">♡</div>
+      <h1>Our Little Dates</h1>
+      <p class="subtitle">Un montón de planes, una historia para vivirlos todos.</p>
+      <div class="row">
+        <input id="password" type="password" placeholder="Nuestra contraseña">
+      </div>
+      <button class="primary bigbtn" style="width:100%" id="unlockBtn">Entrar ♡</button>
+      <div id="loginError" class="error"></div>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div id="app">
+    <header>
+      <nav>
+        <div class="brand">Our Little Dates ♡</div>
+        <div class="navlinks">
+          <button class="active" onclick="showView('home', this)">Inicio</button>
+          <button onclick="showView('dates', this)">Nuestras citas</button>
+          <button onclick="showView('story', this)">Nuestra historia</button>
+          <button onclick="showView('memories', this)">Recuerdos</button>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section id="home" class="view active">
+        <div class="hero">
+          <div class="panel">
+            <div class="eyebrow">Juan + Vale · nuestro pequeño universo</div>
+            <h2>¿Qué hacemos hoy?</h2>
+            <p class="subtitle">Dejá que el destino elija una de nuestras citas. Las que ya vivimos quedan guardadas para siempre.</p>
+            <button class="primary bigbtn" onclick="randomDate()">🎲 Elegir una cita</button>
+            <div style="margin-top:25px">
+              <div style="display:flex;justify-content:space-between;font-size:13px">
+                <span>Progreso</span><b id="progressText">0 / 0</b>
+              </div>
+              <div class="progress"><div id="progressBar"></div></div>
+            </div>
+            <div class="stats">
+              <div class="stat"><b id="total">0</b><span>Total</span></div>
+              <div class="stat"><b id="done">0</b><span>Hechas</span></div>
+              <div class="stat"><b id="left">0</b><span>Pendientes</span></div>
+            </div>
+          </div>
+          <div class="panel date-card" id="dateCard">
+            <div style="text-align:center">
+              <div class="date-letter">TU PRÓXIMA AVENTURA</div>
+              <div class="date-text">Todavía no elegimos una… ♡</div>
+              <button class="ghost" onclick="randomDate()">Elegir al azar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="dates" class="view">
+        <h2 class="section-title">Nuestras citas ♡</h2>
+        <div class="panel">
+          <div class="toolbar">
+            <button class="primary" onclick="openAdd()">＋ Agregar cita</button>
+            <input id="search" placeholder="Buscar una cita…" oninput="renderList()" style="max-width:320px">
+          </div>
+          <div class="letters" id="letters"></div>
+        </div>
+        <div style="height:15px"></div>
+        <div id="dateList" class="list"></div>
+      </section>
+
+      <section id="story" class="view">
+        <h2 class="section-title">Nuestra historia</h2>
+        <div class="panel">
+          <p class="subtitle">Este espacio es para guardar lo que hace que sus citas sean únicas.</p>
+          <div class="formgrid">
+            <input id="storyTitle" placeholder="Título de nuestra historia">
+            <textarea id="storyText" rows="8" placeholder="Escriban acá cómo se conocieron, momentos favoritos, sueños…"></textarea>
+            <button class="primary" onclick="saveStory()">Guardar nuestra historia ♡</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="memories" class="view">
+        <h2 class="section-title">Recuerdos</h2>
+        <div class="panel">
+          <button class="primary" onclick="openMemory()">＋ Guardar un recuerdo</button>
+        </div>
+        <div style="height:15px"></div>
+        <div id="memoryList" class="memories"></div>
+      </section>
+    </main>
+
+    <footer>Hecho para guardar pequeñas aventuras y grandes recuerdos. ♡</footer>
+  </div>
+
+  <div id="modal" class="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="modalTitle" style="font-family:cursive;margin:0">Nueva cita</h2>
+        <button class="ghost" onclick="closeModal()">✕</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const INITIAL=[{"id":"A1","letter":"A","text":"Atardecer juntos (terraza, azotea, plaza, etc).","done":false},{"id":"A2","letter":"A","text":"Armar una escena hot con luces bajas, música sensual y sorpresas.","done":false},{"id":"A3","letter":"A","text":"Almuerzo temático (ej: todo rojo, solo comida circular, etc).","done":false},{"id":"A4","letter":"A","text":"Auto-cine casero.","done":false},{"id":"A5","letter":"A","text":"Acampar.","done":false},{"id":"A6","letter":"A","text":"Armar un álbum de fotos juntos.","done":false},{"id":"A7","letter":"A","text":"Actividad al aire libre.","done":false},{"id":"A8","letter":"A","text":"Almuerzo juntos.","done":false},{"id": "A9", "letter": "A", "text": "Armar playlist romántica juntos.", "done": false}, {"id": "B1", "letter": "B", "text": "Bicicleteada juntos por donde sea y con auris compartidos.", "done": false}, {"id": "B2", "letter": "B", "text": "Búsqueda del tesoro: esconder pistas y un premio al final.", "done": false}, {"id": "B3", "letter": "B", "text": "Baño de burbujas y sales.", "done": false}, {"id": "B4", "letter": "B", "text": "Bailar lento en la oscuridad.", "done": false}, {"id": "B5", "letter": "B", "text": "Bazar: ir a mirar cosas raras o graciosas.", "done": false}, {"id": "B6", "letter": "B", "text": "Baile libre en casa.", "done": false}, {"id": "C1", "letter": "C", "text": "Crear un retrato del otro y firmarlo como si fuera arte valioso.", "done": false}, {"id": "C2", "letter": "C", "text": "Cocinar algo que ninguno haya probado antes.", "done": false}, {"id": "C3", "letter": "C", "text": "Crear un cortometraje con el celu (puede ser hot, gracioso, etc).", "done": false}, {"id": "C4", "letter": "C", "text": "Cartas para abrir en distintos momentos: una si estás triste, una si estás hormonal, etc.", "done": false}, {"id": "C5", "letter": "C", "text": "Cine en todas sus variantes.", "done": false}, {"id": "C6", "letter": "C", "text": "Cafecito con conversación profunda.", "done": false}, {"id": "C7", "letter": "C", "text": "Clase de algo: cocina, baile, idioma (online).", "done": false}, {"id": "C8", "letter": "C", "text": "Cartas con preguntas para conocerse más.", "done": false}, {"id": "C9", "letter": "C", "text": "Colorear ilustraciones de bobbie goods", "done": false}, {"id": "D1", "letter": "D", "text": "Día de desconexión: nada de redes y tecnología, solo nosotros.", "done": false}, {"id": "D2", "letter": "D", "text": "Desafíos en pareja: ¿quién aguanta más sin besarse? ¿Quién gana en mímica?", "done": false}, {"id": "D3", "letter": "D", "text": "Diario visual del día: sacar 10 fotos significativas.", "done": false}, {"id": "D4", "letter": "D", "text": "Dibujo mutuo: nos dibujamos el uno al otro.", "done": false}, {"id": "D5", "letter": "D", "text": "Desayuno sorpresa para el otro.", "done": false}, {"id": "D6", "letter": "D", "text": "Diario compartido: escribir recuerdos o cosas lindas.", "done": false}, {"id": "E1", "letter": "E", "text": "Estimular zonas eróticas con aceite, hielo, plumas, etc.", "done": false}, {"id": "E2", "letter": "E", "text": "Escribirnos cartas eróticas y leerlas en voz alta.", "done": false}, {"id": "E3", "letter": "E", "text": "Elegir retos al azar de un frasco con papeles.", "done": false}, {"id": "E4", "letter": "E", "text": "Experimentar fetiches o juegos nuevos con código seguro.", "done": false}, {"id": "E5", "letter": "E", "text": "Escapada de un día.", "done": false}, {"id": "E6", "letter": "E", "text": "Escribir cartas a futuro.", "done": false}, {"id": "E7", "letter": "E", "text": "Elegir ropa para el otro y hacer mini desfile.", "done": false}, {"id": "E8", "letter": "E", "text": "Explorar un lugar nuevo.", "done": false}, {"id": "E9", "letter": "E", "text": "Estrellada (ver el cielo de noche acostados).", "done": false}, {"id": "F1", "letter": "F", "text": "Feria artesanal o americana.", "done": false}, {"id": "F2", "letter": "F", "text": "Fondue (frutas, malvaviscos, etc).", "done": false}, {"id": "F3", "letter": "F", "text": "Finde gamer con retos por cada derrota.", "done": false}, {"id": "F4", "letter": "F", "text": "Fogón.", "done": false}, {"id": "F5", "letter": "F", "text": "Free tour por la ciudad (ir de turistas).", "done": false}, {"id": "G1", "letter": "G", "text": "Guerrilla de regalos low cost hechos a mano o comprados.", "done": false}, {"id": "G2", "letter": "G", "text": "Guerra de cosquillas (revancha en la cama..?).", "done": false}, {"id": "G3", "letter": "G", "text": "Galería de fotos íntimas juntos.", "done": false}, {"id": "G4", "letter": "G", "text": "Gala en casa: vestirnos full elegante y comer algo re tranqui.", "done": false}, {"id": "G5", "letter": "G", "text": "Guerra de almohadas.", "done": false}, {"id": "G6", "letter": "G", "text": "Graffitis o arte callejero: salir a buscarlos.", "done": false}, {"id": "G7", "letter": "G", "text": "Games night: juegos de mesa, cartas o app.", "done": false}, {"id": "G8", "letter": "G", "text": "Gratitud mutua: decirnos 10 cosas que agradecemos del otro.", "done": false}, {"id": "G9", "letter": "G", "text": "Galletitas decoradas juntos.", "done": false}, {"id": "G10", "letter": "G", "text": "Galería de arte o cultural.", "done": false}, {"id": "H1", "letter": "H", "text": "Hacer un podcast en pareja con temas insólitos.", "done": false}, {"id": "H2", "letter": "H", "text": "Hacer una cena donde todo se come sin manos.", "done": false}, {"id": "H3", "letter": "H", "text": "Hacer una lista de retos (de cualquier tipo) y tirar un dado para ver cuál toca.", "done": false}, {"id": "H4", "letter": "H", "text": "Helado + caminata nocturna.", "done": false}, {"id": "H5", "letter": "H", "text": "Hacer un video gracioso tipo TikTok.", "done": false}, {"id": "H6", "letter": "H", "text": "Hornear algo juntos.", "done": false}, {"id": "H7", "letter": "H", "text": "Hacer una lista de sueños compartidos.", "done": false}, {"id": "H8", "letter": "H", "text": "Hacer un reto o challenge en pareja.", "done": false}, {"id": "I1", "letter": "I", "text": "Inventar una serie juntos: personajes, trama y drama.", "done": false}, {"id": "I2", "letter": "I", "text": "Intercambio de cartas con cosas que nunca nos dijimos.", "done": false}, {"id": "I3", "letter": "I", "text": "Improvisar una pasarela con ropa del otro.", "done": false}, {"id": "I4", "letter": "I", "text": "Ir a ver el amanecer.", "done": false}, {"id": "I5", "letter": "I", "text": "Ir a un lugar abandonado (si es seguro).", "done": false}, {"id": "I6", "letter": "I", "text": "Inventar un idioma entre nosotros.", "done": false}, {"id": "J1", "letter": "J", "text": "Juego de roles sexual: meserx + clientx, profesorx + alumnx, etc.", "done": false}, {"id": "J2", "letter": "J", "text": "Juegos de mesa con prendas y/o recompensas.", "done": false}, {"id": "J3", "letter": "J", "text": "Juegos eróticos tipo dados, cartas, ruleta con retos.", "done": false}, {"id": "J4", "letter": "J", "text": "Jugar como si tuviéramos 5 años (colorear, saltar, hablar raro).", "done": false}, {"id": "J5", "letter": "J", "text": "Jugar a hacerse entrevistas.", "done": false}, {"id": "J6", "letter": "J", "text": "Jugar a piedra, papel o tijera con prenda.", "done": false}, {"id": "J7", "letter": "J", "text": "Juntar cosas para armar un recuerdo (flores, papelitos, etc.)", "done": false}, {"id": "J8", "letter": "J", "text": "Jugar al UNO, Truco, etc.", "done": false}, {"id": "J9", "letter": "J", "text": "Jugar con slime, plastilina, legos, etc.", "done": false}, {"id": "K1", "letter": "K", "text": "Karaoke con canciones ridículas + vestuario improvisado.", "done": false}, {"id": "K2", "letter": "K", "text": "Kit de recuerdos: juntar cosas del día en una caja.", "done": false}, {"id": "K3", "letter": "K", "text": "Kamasutra: elegir una posición nueva y experimentar.", "done": false}, {"id": "K4", "letter": "K", "text": "Kermés improvisada en casa.", "done": false}, {"id": "K5", "letter": "K", "text": "Kilos de comida chatarra + noche de pelis.", "done": false}, {"id": "K6", "letter": "K", "text": "Kit sorpresa armado por uno para el otro.", "done": false}, {"id": "K7", "letter": "K", "text": "Kiosco challenge: comprar con poco y armar cena.", "done": false}, {"id": "L1", "letter": "L", "text": "Lluvia + sofá + mimos + peli melosa.", "done": false}, {"id": "L2", "letter": "L", "text": "Lencería + luces rojas + desfile privado.", "done": false}, {"id": "L3", "letter": "L", "text": "Live reaccionando a videos de nuestros top momentos juntos.", "done": false}, {"id": "L4", "letter": "L", "text": "Lista de “cosas por hacer juntos antes de…”", "done": false}, {"id": "L5", "letter": "L", "text": "Lanzarnos cumplidos sin parar durante 5 min.", "done": false}, {"id": "L6", "letter": "L", "text": "Lectura juntos.", "done": false}, {"id": "M1", "letter": "M", "text": "Mapa de nuestros momentos: marcar lugares importantes y contarlos.", "done": false}, {"id": "M2", "letter": "M", "text": "Masaje con música y sin hablar.", "done": false}, {"id": "M3", "letter": "M", "text": "Maratón de series/pelis.", "done": false}, {"id": "M4", "letter": "M", "text": "Manualidades: pulseras, cuadros, decoraciones.", "done": false}, {"id": "M5", "letter": "M", "text": "Merienda casera o en cafetería.", "done": false}, {"id": "M6", "letter": "M", "text": "Modo “no hablar”: Comunicarnos solo con gestos.", "done": false}, {"id": "N1", "letter": "N", "text": "Noche temática de país (comida, ropa, música).", "done": false}, {"id": "N2", "letter": "N", "text": "Noche de confesiones (sin juzgarnos).", "done": false}, {"id": "N3", "letter": "N", "text": "Noche de playlists: Juan arma para Vale y viceversa", "done": false}, {"id": "N4", "letter": "N", "text": "Noche en otro cuarto: hacernos los que no nos conocemos y seducirnos de nuevo", "done": false}, {"id": "O1", "letter": "O", "text": "Objeto misterioso: cada uno compra algo sin decir y se lo da envuelto.", "done": false}, {"id": "O2", "letter": "O", "text": "Origami romántico.", "done": false}, {"id": "O3", "letter": "O", "text": "Orgasmo challenge: cuántas veces pueden llegar en una tarde.", "done": false}, {"id": "O4", "letter": "O", "text": "Obra de teatro.", "done": false}, {"id": "O5", "letter": "O", "text": "Oír algo juntos y comentarlo.", "done": false}, {"id": "P1", "letter": "P", "text": "Pizza casera con formas raras (corazón, iniciales, etc).", "done": false}, {"id": "P2", "letter": "P", "text": "Prueba de besos: probarse besos en distintas partes del cuerpo.", "done": false}, {"id": "P3", "letter": "P", "text": "Pacto de decirse todo por 1 hora (sin juzgar, solo escuchar).", "done": false}, {"id": "P4", "letter": "P", "text": "Pócimas: mezclas cosas locas de bebida que el otro tiene que tomar.", "done": false}, {"id": "P5", "letter": "P", "text": "Paseo largo sin rumbo.", "done": false}, {"id": "P6", "letter": "P", "text": "Pintarse el uno al otro (cara, cuerpo, etc.).", "done": false}, {"id": "P7", "letter": "P", "text": "Picnic en el parque.", "done": false}, {"id": "P8", "letter": "P", "text": "Pileta (verano).", "done": false}, {"id": "P9", "letter": "P", "text": "Peli muda: ver una sin sonido e inventar diálogo.", "done": false}, {"id": "P10", "letter": "P", "text": "Pintar remeras, cuadros o tazas juntos.", "done": false}, {"id": "Q1", "letter": "Q", "text": "Quemar papelitos con miedos y deseos frente a una vela", "done": false}, {"id": "Q2", "letter": "Q", "text": "Quiz de pareja: ¿quién recuerda más detalles del otro?", "done": false}, {"id": "Q3", "letter": "Q", "text": "Quedarse todo el día en pijama.", "done": false}, {"id": "Q4", "letter": "Q", "text": "Quebrar la rutina: hacer algo que nunca haríamos.", "done": false}, {"id": "Q5", "letter": "Q", "text": "Qué harías si… (juego de situaciones).", "done": false}, {"id": "R1", "letter": "R", "text": "Recorrido por el cuerpo del otro con los ojos vendados.", "done": false}, {"id": "R2", "letter": "R", "text": "Recrear escenas románticas o hot de películas.", "done": false}, {"id": "R3", "letter": "R", "text": "Recordar nuestra historia desde el principio y grabarlo.", "done": false}, {"id": "S1", "letter": "S", "text": "Show en casa: Juan canta, Vale baila, etc.", "done": false}, {"id": "S2", "letter": "S", "text": "Strip challenge con prendas escondidas.", "done": false}, {"id": "S3", "letter": "S", "text": "Sesión de fotos de nosotros.", "done": false}, {"id": "S4", "letter": "S", "text": "Sueños compartidos: escribir cómo nos imaginamos de viejitos.", "done": false}, {"id": "S5", "letter": "S", "text": "Salir por la zona a tomar fotos de cosas a nuestro parecer lindas.", "done": false}, {"id": "T1", "letter": "T", "text": "Torneo deportivo auto-organizado.", "done": false}, {"id": "T2", "letter": "T", "text": "Taller de algo: cerámica, cocina, pintura.", "done": false}, {"id": "U1", "letter": "U", "text": "Un día donde uno sirve al otro TODO el tiempo.", "done": false}, {"id": "U2", "letter": "U", "text": "Usar solo 3 palabras para comunicarnos durante una media hora.", "done": false}, {"id": "U3", "letter": "U", "text": "Underwear fashion show privado.", "done": false}, {"id": "U4", "letter": "U", "text": "Un dibujo al otro sin mirar.", "done": false}, {"id": "U5", "letter": "U", "text": "Un video de nosotros para ver en el futuro.", "done": false}, {"id": "V1", "letter": "V", "text": "Viaje imaginario: armar un moodboard del viaje ideal y contarlo.", "done": false}, {"id": "V2", "letter": "V", "text": "Vestirnos como personajes de una serie/película.", "done": false}, {"id": "V3", "letter": "V", "text": "Voto de amor: cada uno escribe 3 promesas para el otro.", "done": false}, {"id": "V4", "letter": "V", "text": "Viaje corto.", "done": false}, {"id": "V5", "letter": "V", "text": "Video reacción: miramos algo y nos filmamos.", "done": false}, {"id": "V6", "letter": "V", "text": "Volver al primer lugar donde nos conocimos.", "done": false}, {"id": "V7", "letter": "V", "text": "Ver pelis de nuestra infancia.", "done": false}, {"id": "V8", "letter": "V", "text": "Volver a tener una “primera cita” actuada.", "done": false}, {"id": "W1", "letter": "W", "text": "Wine & Talk: vino barato y hablar de temas profundos", "done": false}, {"id": "W2", "letter": "W", "text": "Wellness: spa, mimos, relajación compartida", "done": false}, {"id": "X1", "letter": "X", "text": "Xtreme: karting, escalada, tirolesa, skate.", "done": false}, {"id": "X2", "letter": "X", "text": "Xilófono emocional: música y charla profunda.", "done": false}, {"id": "X3", "letter": "X", "text": "XOXO: cartas o mensajitos escondidos por toda la casa.", "done": false}, {"id": "Y1", "letter": "Y", "text": "Yoga en pareja.", "done": false}, {"id": "Y2", "letter": "Y", "text": "Y si…: completar frases como 'Y si viviera contigo...', 'Y si tuviéramos un hijo…'", "done": false}, {"id": "Y3", "letter": "Y", "text": "Yes night: sólo se puede decir que sí a todo (consensuado, obvio).", "done": false}, {"id": "Y4", "letter": "Y", "text": "YouTube: retos en pareja o creación de contenido juntos.", "done": false}, {"id": "Y5", "letter": "Y", "text": "Yapa: hacer algo más cuando ya parecía que terminaba.", "done": false}, {"id": "Z1", "letter": "Z", "text": "Zafarrancho en la cocina: cocinar sin receta.", "done": false}, {"id": "Z2", "letter": "Z", "text": "Zona hot: preparar un espacio con luces, música y reglas hot.", "done": false}, {"id": "Z3", "letter": "Z", "text": "Zzz juntos: dormir abrazados.", "done": false}, {"id": "Z4", "letter": "Z", "text": "Zapping de escenas hot: analizar y recrear algunas con nuestro toque.", "done": false}];
+
+    const KEY = 'ourLittleDates_v2';
+    const PASS = 'juanvale';
+
+    let state = { dates: INITIAL, memories: [], story: { title: '', text: '' } };
+    try {
+      const saved = localStorage.getItem(KEY);
+      if (saved) state = JSON.parse(saved);
+    } catch(e) {
+      console.error(e);
+    }
+
+    let currentLetter = 'ALL';
+
+    function openApp() {
+      document.getElementById('lock').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      init();
+    }
+
+    function checkPassword() {
+      const input = document.getElementById('password').value.trim().toLowerCase();
+      if (input === PASS) {
+        sessionStorage.setItem('is_auth', 'true');
+        openApp();
+      } else {
+        document.getElementById('loginError').textContent = 'Esa no es nuestra contraseña ♡';
+      }
+    }
+
+    document.getElementById('unlockBtn').addEventListener('click', checkPassword);
+    document.getElementById('password').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') checkPassword();
+    });
+
+    // Auto-login si ya inició sesión antes en la misma pestaña
+    if (sessionStorage.getItem('is_auth') === 'true') {
+      openApp();
+    }
+
+    function save() {
+      localStorage.setItem(KEY, JSON.stringify(state));
+      updateStats();
+      renderList();
+      renderMemories();
+    }
+
+    function init() {
+      updateStats();
+      renderLetters();
+      renderList();
+      renderMemories();
+      document.getElementById('storyTitle').value = state.story.title || '';
+      document.getElementById('storyText').value = state.story.text || '';
+    }
+
+    function showView(id, btn) {
+      document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.navlinks button').forEach(x => x.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function updateStats() {
+      let d = state.dates.filter(x => x.done).length;
+      let t = state.dates.length;
+      document.getElementById('total').textContent = t;
+      document.getElementById('done').textContent = d;
+      document.getElementById('left').textContent = t - d;
+      document.getElementById('progressText').textContent = d + ' / ' + t;
+      document.getElementById('progressBar').style.width = (t ? (d / t * 100) : 0) + '%';
+    }
+
+    function randomDate() {
+      const pending = state.dates.filter(x => !x.done);
+      if (!pending.length) {
+        toast('¡Completaron todas las citas! ♡');
+        return;
+      }
+      const item = pending[Math.floor(Math.random() * pending.length)];
+      const card = document.getElementById('dateCard');
+      
+      card.innerHTML = `
+        <div style="text-align:center">
+          <div class="date-letter">CITA · ${item.letter}</div>
+          <div class="date-text">${esc(item.text)}</div>
+          <div class="actions" style="justify-content:center">
+            <button class="primary" onclick="markDone('${item.id}')">♡ La hicimos</button>
+            <button class="ghost" onclick="randomDate()">🔄 Otra</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function markDone(id) {
+      const d = state.dates.find(x => x.id === id);
+      if (d) {
+        d.done = true;
+        d.completedAt = new Date().toLocaleDateString('es-AR');
+        save();
+        toast('Cita guardada como recuerdo ♡');
+        setTimeout(randomDate, 300);
+      }
+    }
+
+    function renderLetters() {
+      const letters = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+      let html = `<button class="${currentLetter === 'ALL' ? 'active' : ''}" onclick="setLetter('ALL')">Todas</button>`;
+      html += letters.map(l => `<button class="${currentLetter === l ? 'active' : ''}" onclick="setLetter('${l}')">${l}</button>`).join('');
+      document.getElementById('letters').innerHTML = html;
+    }
+
+    function setLetter(l) {
+      currentLetter = l;
+      renderLetters();
+      renderList();
+    }
+
+    function renderList() {
+      const query = (document.getElementById('search')?.value || '').toLowerCase();
+      let filtered = state.dates.filter(x => (currentLetter === 'ALL' || x.letter === currentLetter) && x.text.toLowerCase().includes(query));
+      
+      if (!filtered.length) {
+        document.getElementById('dateList').innerHTML = '<div class="panel">No hay citas con ese filtro ♡</div>';
+        return;
+      }
+
+      document.getElementById('dateList').innerHTML = filtered.map(d => `
+        <div class="item ${d.done ? 'done' : ''}">
+          <button class="check" onclick="toggleDone('${d.id}')"></button>
+          <div style="flex:1">
+            <div class="txt">${esc(d.text)}</div>
+            <div class="meta">${d.letter} · ${d.done ? 'Hecha ' + (d.completedAt || '') : 'Pendiente'}</div>
+          </div>
+          ${d.custom ? `<div class="small-actions"><button onclick="deleteDate('${d.id}')">🗑️</button></div>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function toggleDone(id) {
+      const d = state.dates.find(x => x.id === id);
+      if (d) {
+        d.done = !d.done;
+        d.completedAt = d.done ? new Date().toLocaleDateString('es-AR') : '';
+        save();
+      }
+    }
+
+    function openAdd() {
+      openModal('Agregar una cita', `
+        <div class="formgrid">
+          <input id="newLetter" maxlength="1" placeholder="Letra (A-Z)">
+          <textarea id="newText" rows="4" placeholder="Escribí la nueva cita…"></textarea>
+          <button class="primary" onclick="addDate()">Agregar ♡</button>
+        </div>
+      `);
+    }
+
+    function addDate() {
+      let l = (document.getElementById('newLetter').value || '').toUpperCase().trim();
+      let t = document.getElementById('newText').value.trim();
+      if (!/^[A-Z]$/.test(l) || !t) return toast('Completá la letra y la cita ♡');
+      
+      state.dates.push({ id: 'C' + Date.now(), letter: l, text: t, done: false, custom: true });
+      state.dates.sort((a, b) => a.letter.localeCompare(b.letter) || a.text.localeCompare(b.text));
+      save();
+      closeModal();
+    }
+
+    function deleteDate(id) {
+      if (confirm('¿Eliminar esta cita?')) {
+        state.dates = state.dates.filter(x => x.id !== id);
+        save();
+      }
+    }
+
+    function saveStory() {
+      state.story = {
+        title: document.getElementById('storyTitle').value,
+        text: document.getElementById('storyText').value
+      };
+      save();
+      toast('Nuestra historia quedó guardada ♡');
+    }
+
+    function openMemory() {
+      openModal('Guardar un recuerdo', `
+        <div class="formgrid">
+          <input id="mTitle" placeholder="Título">
+          <input id="mDate" type="date">
+          <input id="mPhoto" type="file" accept="image/*">
+          <textarea id="mNote" rows="4" placeholder="¿Qué pasó? ¿Cómo se sintieron?"></textarea>
+          <button class="primary" onclick="addMemory()">Guardar recuerdo ♡</button>
+        </div>
+      `);
+    }
+
+    function addMemory() {
+      const file = document.getElementById('mPhoto').files[0];
+      const memory = {
+        title: document.getElementById('mTitle').value || 'Nuestro recuerdo',
+        date: document.getElementById('mDate').value,
+        note: document.getElementById('mNote').value
+      };
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          memory.img = reader.result;
+          state.memories.unshift(memory);
+          save();
+          closeModal();
+        };
+        reader.readAsDataURL(file);
+      } else {
+        state.memories.unshift(memory);
+        save();
+        closeModal();
+      }
+    }
+
+    function renderMemories() {
+      if (!state.memories.length) {
+        document.getElementById('memoryList').innerHTML = '<div class="panel">Todavía no hay recuerdos. Guarden acá los momentos especiales ♡</div>';
+        return;
+      }
+      document.getElementById('memoryList').innerHTML = state.memories.map((m, i) => `
+        <article class="memory">
+          ${m.img ? `<img src="${m.img}">` : ''}
+          <div class="memory-body">
+            <b>${esc(m.title)}</b>
+            <div class="meta">${m.date || ''}</div>
+            <p>${esc(m.note || '')}</p>
+            <button class="ghost" onclick="deleteMemory(${i})">Eliminar</button>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function deleteMemory(i) {
+      if (confirm('¿Eliminar este recuerdo?')) {
+        state.memories.splice(i, 1);
+        save();
+      }
+    }
+
+    function openModal(title, body) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalBody').innerHTML = body;
+      document.getElementById('modal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('show');
+    }
+
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c]));
+    }
+
+    function toast(msg) {
+      const t = document.createElement('div');
+      t.textContent = msg;
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#4b3940;color:#fff;padding:12px 18px;border-radius:14px;z-index:100';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2200);
+    }
+  </script>
+</body>
+</html>
